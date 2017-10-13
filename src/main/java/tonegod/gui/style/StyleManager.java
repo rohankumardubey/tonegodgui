@@ -4,6 +4,16 @@
  */
 package tonegod.gui.style;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 import com.jme3.app.Application;
 import com.jme3.asset.AssetKey;
 import com.jme3.asset.AssetNotFoundException;
@@ -13,15 +23,8 @@ import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.math.Vector4f;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import tonegod.gui.core.Screen;
+
+import tonegod.gui.core.ElementManager;
 import tonegod.gui.core.utils.XMLHelper;
 import tonegod.gui.effects.Effect;
 
@@ -51,14 +54,14 @@ public class StyleManager {
 		CUSTOM_8,
 		CUSTOM_9
 	}
-	Screen screen;
+	ElementManager screen;
 	Application app;
 	private Map<String, Style> styles = new HashMap<>();
 	private Map<CursorType, JmeCursor> cursors = new HashMap<>();
 	private Map<String, AudioNode> audioNodes = new HashMap<>();
 	private String styleMap;
 	
-	public StyleManager(Screen screen, String styleMap) {
+	public StyleManager(ElementManager screen, String styleMap) {
 		this.screen = screen;
 		this.app = screen.getApplication();
 		this.styleMap = styleMap;

@@ -4,7 +4,7 @@
  */
 package tonegod.gui.core;
 
-import com.jme3.app.Application;
+import com.jme3.app.SimpleApplication;
 import com.jme3.collision.CollisionResult;
 import com.jme3.font.BitmapFont;
 import com.jme3.input.event.KeyInputEvent;
@@ -13,6 +13,7 @@ import com.jme3.math.Vector3f;
 import com.jme3.math.Vector4f;
 import com.jme3.scene.Node;
 import com.jme3.texture.Texture;
+
 import tonegod.gui.controls.util.ModalBackground;
 import tonegod.gui.core.utils.ScaleUtil;
 import tonegod.gui.effects.EffectManager;
@@ -27,7 +28,7 @@ import tonegod.gui.style.StyleManager.CursorType;
  * @author t0neg0d
  */
 public interface ElementManager {
-    Application getApplication();
+   SimpleApplication getApplication();
 
     float getWidth();
     float getHeight();
@@ -103,4 +104,7 @@ public interface ElementManager {
     void addAnimLayer(String UID, AnimLayer layer);
     AnimLayer removeAnimLayer(String UID);
     void removeAnimLayer(AnimLayer animLayer);
+    
+    public void playAudioNode(String key, float volume);
+     
 }

@@ -1,5 +1,14 @@
 package tonegod.gui.style;
 
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.StringTokenizer;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.asset.AssetKey;
 import com.jme3.asset.AssetNotFoundException;
@@ -12,13 +21,7 @@ import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.math.Vector4f;
 import com.jme3.texture.Texture;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.StringTokenizer;
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
+
 import tonegod.gui.controls.buttons.Button;
 import tonegod.gui.controls.buttons.ButtonAdapter;
 import tonegod.gui.controls.buttons.CheckBox;
@@ -49,7 +52,7 @@ import tonegod.gui.controls.windows.TabControl;
 import tonegod.gui.controls.windows.Window;
 import tonegod.gui.core.Element;
 import tonegod.gui.core.Element.Orientation;
-import tonegod.gui.core.Screen;
+import tonegod.gui.core.ElementManager;
 import tonegod.gui.core.utils.UIDUtil;
 import tonegod.gui.core.utils.XMLHelper;
 import tonegod.gui.effects.Effect;
@@ -59,12 +62,12 @@ import tonegod.gui.effects.Effect;
  * @author t0neg0d
  */
 public class LayoutParser {
-        Screen screen;
+   ElementManager screen;
         AbstractAppState state;
         
         List<Class> controls = new ArrayList<>();
         
-        public LayoutParser(Screen screen) {
+        public LayoutParser(ElementManager screen) {
                 this.screen = screen;
                 
                 

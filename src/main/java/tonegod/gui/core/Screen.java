@@ -1,10 +1,23 @@
 package tonegod.gui.core;
 
-import tonegod.gui.style.StyleManager;
-import tonegod.gui.style.LayoutParser;
-import tonegod.gui.style.Style;
-import tonegod.gui.style.StyleLoader;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
+import java.io.IOException;
+import java.nio.FloatBuffer;
+import java.text.ParseException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.StringTokenizer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.jme3.app.Application;
+import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.audio.AudioNode;
 import com.jme3.collision.CollisionResult;
@@ -39,21 +52,7 @@ import com.jme3.scene.VertexBuffer;
 import com.jme3.scene.control.Control;
 import com.jme3.texture.Texture;
 import com.jme3.util.SafeArrayList;
-import java.awt.Toolkit;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.StringSelection;
-import java.awt.datatransfer.Transferable;
-import java.io.IOException;
-import java.nio.FloatBuffer;
-import java.text.ParseException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.StringTokenizer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 import tonegod.gui.controls.extras.android.Keyboard;
 import tonegod.gui.controls.form.Form;
 import tonegod.gui.controls.lists.ComboBox;
@@ -63,7 +62,6 @@ import tonegod.gui.controls.text.TextField;
 import tonegod.gui.controls.util.ModalBackground;
 import tonegod.gui.controls.util.ToolTip;
 import tonegod.gui.core.Element.Borders;
-import tonegod.gui.style.StyleManager.CursorType;
 import tonegod.gui.core.utils.BitmapTextUtil;
 import tonegod.gui.core.utils.ScaleUtil;
 import tonegod.gui.core.utils.UIDUtil;
@@ -71,10 +69,22 @@ import tonegod.gui.effects.EffectManager;
 import tonegod.gui.effects.cursor.CursorEffects;
 import tonegod.gui.fonts.BitmapFontLoaderX;
 import tonegod.gui.framework.core.AnimElement;
-import tonegod.gui.framework.core.AnimManager;
 import tonegod.gui.framework.core.AnimLayer;
+import tonegod.gui.framework.core.AnimManager;
 import tonegod.gui.framework.core.QuadData;
-import tonegod.gui.listeners.*;
+import tonegod.gui.listeners.FlingListener;
+import tonegod.gui.listeners.KeyboardListener;
+import tonegod.gui.listeners.MouseButtonListener;
+import tonegod.gui.listeners.MouseFocusListener;
+import tonegod.gui.listeners.MouseMovementListener;
+import tonegod.gui.listeners.MouseWheelListener;
+import tonegod.gui.listeners.TabFocusListener;
+import tonegod.gui.listeners.TouchListener;
+import tonegod.gui.style.LayoutParser;
+import tonegod.gui.style.Style;
+import tonegod.gui.style.StyleLoader;
+import tonegod.gui.style.StyleManager;
+import tonegod.gui.style.StyleManager.CursorType;
 
 /**
  *
@@ -92,7 +102,7 @@ public class Screen implements ElementManager, Control, RawInputListener {
 		Fling,
 		None
 	}
-	private Application app;
+	private SimpleApplication app;
 	protected Spatial spatial;
 	private Map<String, Element> elements = new LinkedHashMap<>();
 	private Map<String, SubScreen> subscreens = new HashMap<>();
@@ -228,7 +238,7 @@ public class Screen implements ElementManager, Control, RawInputListener {
 	 * 
 	 * @param app A JME Application
 	 */
-	public Screen(Application app) {
+	public Screen(SimpleApplication app) {
 		this(app, "tonegod/gui/style/def/style_map.gui.xml");
 	}
 	
@@ -238,7 +248,7 @@ public class Screen implements ElementManager, Control, RawInputListener {
 	 * @param app A JME Application
 	 * @param styleMap A path to the style_map.xml file containing the custom theme information
 	 */
-	public Screen(Application app, String styleMap) {
+	public Screen(SimpleApplication app, String styleMap) {
 		if(!initializedLoader) {
 			app.getAssetManager().registerLoader(StyleLoader.class, "gui.xml");
 			initializedLoader = true;
@@ -261,13 +271,16 @@ public class Screen implements ElementManager, Control, RawInputListener {
 		
 		defaultGUIFont = app.getAssetManager().loadFont(styleManager.getStyle("Font").getString("defaultFont"));
 		
-		scenes.add((Node)app.getViewPort().getScenes().get(0));
-                
+
+		//TODO JJC changed this to work with VR dont know its purpose yet
+//		scenes.add((Node)app.getViewPort().getScenes().get(0));
+		scenes.add(app.getRootNode());
+		
 		scaleManager = new ScaleUtil(this);
 		scaleManager.initialize();
 	}
 	
-	public Screen(Application app, String styleMap, float width, float height) {
+	public Screen(SimpleApplication app, String styleMap, float width, float height) {
 		if(!initializedLoader) {
 			app.getAssetManager().registerLoader(StyleLoader.class, "gui.xml");
 			initializedLoader = true;
@@ -303,7 +316,7 @@ public class Screen implements ElementManager, Control, RawInputListener {
 	 * @return Application app
 	 */
 	@Override
-	public Application getApplication() {
+	public SimpleApplication getApplication() {
 		return this.app;
 	}
 	
@@ -701,99 +714,100 @@ public class Screen implements ElementManager, Control, RawInputListener {
 	public void onMouseMotionEvent(MouseMotionEvent evt) {
 		setMouseXY(evt.getX(),evt.getY());
 		
-		if (this.useCursorEffects) {
-			if (app.getInputManager().isCursorVisible())
-				cursorEffects.updatePosition(mouseXY);
-		}
-		if (useToolTips) updateToolTipLocation();
-		if (!mousePressed) {
-			mouseFocusElement = getEventElement(mouseXY.x, mouseXY.y, EventCheckType.MouseFocus);
-			if (mouseFocusElement != null) {
-				if (useCustomCursors) {
-					if (mouseFocusElement.getIsResizable()) {
-						float offsetX = mouseXY.x;
-						float offsetY = mouseXY.y;
-						Element el = mouseFocusElement;
-						if (offsetX > el.getAbsoluteX() && offsetX < el.getAbsoluteX()+el.getResizeBorderWestSize() &&
-							offsetY > el.getAbsoluteY() && offsetY < el.getAbsoluteY()+el.getResizeBorderNorthSize()) {
-							if (el.getResizeW() && el.getResizeS()) this.setCursor(CursorType.RESIZE_CNE);
-							else if (el.getResizeW()) this.setCursor(CursorType.RESIZE_EW);
-							else if (el.getResizeS()) this.setCursor(CursorType.RESIZE_NS);
-						} else if (offsetX > (el.getAbsoluteWidth()-el.getResizeBorderEastSize()) && offsetX < el.getAbsoluteWidth() &&
-							offsetY > el.getAbsoluteY() && offsetY < el.getAbsoluteY()+el.getResizeBorderNorthSize()) {
-							if (el.getResizeE() && el.getResizeS()) this.setCursor(CursorType.RESIZE_CNW);
-							else if (el.getResizeE()) this.setCursor(CursorType.RESIZE_EW);
-							else if (el.getResizeS()) this.setCursor(CursorType.RESIZE_NS);
-						} else if (offsetY > el.getAbsoluteY() && offsetY < el.getAbsoluteY()+el.getResizeBorderNorthSize()) {
-							if (el.getResizeS()) this.setCursor(CursorType.RESIZE_NS);
-						} else if (offsetX > el.getAbsoluteX() && offsetX < el.getAbsoluteX()+el.getResizeBorderWestSize() &&
-							offsetY > (el.getAbsoluteHeight()-el.getResizeBorderSouthSize()) && offsetY < el.getAbsoluteHeight()) {
-							if (el.getResizeW() && el.getResizeN()) this.setCursor(CursorType.RESIZE_CNW);
-							else if (el.getResizeW()) this.setCursor(CursorType.RESIZE_EW);
-							else if (el.getResizeN()) this.setCursor(CursorType.RESIZE_NS);
-						} else if (offsetX > (el.getAbsoluteWidth()-el.getResizeBorderEastSize()) && offsetX < el.getAbsoluteWidth() &&
-							offsetY > (el.getAbsoluteHeight()-el.getResizeBorderSouthSize()) && offsetY < el.getAbsoluteHeight()) {
-							if (el.getResizeE() && el.getResizeN()) this.setCursor(CursorType.RESIZE_CNE);
-							else if (el.getResizeE()) this.setCursor(CursorType.RESIZE_EW);
-							else if (el.getResizeN()) this.setCursor(CursorType.RESIZE_NS);
-						} else if (offsetY > (el.getAbsoluteHeight()-el.getResizeBorderSouthSize()) && offsetY < el.getAbsoluteHeight()) {
-							if (el.getResizeN()) this.setCursor(CursorType.RESIZE_NS);
-						} else if (offsetX > el.getAbsoluteX() && offsetX < el.getAbsoluteX()+el.getResizeBorderWestSize()) {
-							if (el.getResizeW()) this.setCursor(CursorType.RESIZE_EW);
-						} else if (offsetX > (el.getAbsoluteWidth()-el.getResizeBorderEastSize()) && offsetX < el.getAbsoluteWidth()) {
-							if (el.getResizeE()) this.setCursor(CursorType.RESIZE_EW);
-						} else {
-							this.setCursor(CursorType.POINTER);
-						}
-					} else {
-						if (currentCursor != CursorType.HAND &&
-							currentCursor != CursorType.TEXT)
-							this.setCursor(CursorType.POINTER);
-					}
-				} else {
-					this.setCursor(CursorType.POINTER);
-				}
-			}
-			if (mouseFocusElement != previousMouseFocusElement) {
-				if (previousMouseFocusElement instanceof MouseFocusListener) {
-					((MouseFocusListener)previousMouseFocusElement).onLoseFocus(evt);
-				}
-				if (mouseFocusElement instanceof MouseFocusListener) {
-					((MouseFocusListener)mouseFocusElement).onGetFocus(evt);
-				}
-				previousMouseFocusElement = mouseFocusElement;
-			}
-			if (mouseFocusElement != null) {
-				focusElementIsMovable = mouseFocusElement.getIsMovable();
-				
-			}
-			if (mouseFocusElement instanceof MouseMovementListener) {
-				((MouseMovementListener)mouseFocusElement).onMouseMove(evt);
-			}
-			mouseWheelElement = getEventElement(mouseXY.x, mouseXY.y, EventCheckType.WheelMove);
-			if (mouseWheelElement instanceof MouseWheelListener) {
-				if (evt.getDeltaWheel() > 0) {
-					((MouseWheelListener)mouseWheelElement).onMouseWheelDown(evt);
-				} else if (evt.getDeltaWheel() < 0) {
-					((MouseWheelListener)mouseWheelElement).onMouseWheelUp(evt);
-				}
-			}
-		} else {
-			if (eventElement != null) {
-				if (mouseLeftPressed) {
-					focusElementIsMovable = contactElement.getIsMovable();
-					if (eventElementResizeDirection != null) {
-						eventElement.resize(mouseXY.x, mouseXY.y, eventElementResizeDirection);
-					} else if (focusElementIsMovable) {
-						eventElement.moveTo(mouseXY.x-eventElementOffsetX, mouseXY.y-eventElementOffsetY);
-					}
-				}
-
-				if (eventElement instanceof MouseMovementListener) {
-					((MouseMovementListener)eventElement).onMouseMove(evt);
-				}
-			}
-		}
+//		if (this.useCursorEffects) {
+//			if (app.getInputManager().isCursorVisible())
+//				cursorEffects.updatePosition(mouseXY);
+//		}
+//		if (useToolTips) updateToolTipLocation();
+//		if (!mousePressed) {
+//			mouseFocusElement = getEventElement(mouseXY.x, mouseXY.y, EventCheckType.MouseFocus);
+//			System.out.println("mouseFocusElement "+mouseFocusElement);
+//			if (mouseFocusElement != null) {
+//				if (useCustomCursors) {
+//					if (mouseFocusElement.getIsResizable()) {
+//						float offsetX = mouseXY.x;
+//						float offsetY = mouseXY.y;
+//						Element el = mouseFocusElement;
+//						if (offsetX > el.getAbsoluteX() && offsetX < el.getAbsoluteX()+el.getResizeBorderWestSize() &&
+//							offsetY > el.getAbsoluteY() && offsetY < el.getAbsoluteY()+el.getResizeBorderNorthSize()) {
+//							if (el.getResizeW() && el.getResizeS()) this.setCursor(CursorType.RESIZE_CNE);
+//							else if (el.getResizeW()) this.setCursor(CursorType.RESIZE_EW);
+//							else if (el.getResizeS()) this.setCursor(CursorType.RESIZE_NS);
+//						} else if (offsetX > (el.getAbsoluteWidth()-el.getResizeBorderEastSize()) && offsetX < el.getAbsoluteWidth() &&
+//							offsetY > el.getAbsoluteY() && offsetY < el.getAbsoluteY()+el.getResizeBorderNorthSize()) {
+//							if (el.getResizeE() && el.getResizeS()) this.setCursor(CursorType.RESIZE_CNW);
+//							else if (el.getResizeE()) this.setCursor(CursorType.RESIZE_EW);
+//							else if (el.getResizeS()) this.setCursor(CursorType.RESIZE_NS);
+//						} else if (offsetY > el.getAbsoluteY() && offsetY < el.getAbsoluteY()+el.getResizeBorderNorthSize()) {
+//							if (el.getResizeS()) this.setCursor(CursorType.RESIZE_NS);
+//						} else if (offsetX > el.getAbsoluteX() && offsetX < el.getAbsoluteX()+el.getResizeBorderWestSize() &&
+//							offsetY > (el.getAbsoluteHeight()-el.getResizeBorderSouthSize()) && offsetY < el.getAbsoluteHeight()) {
+//							if (el.getResizeW() && el.getResizeN()) this.setCursor(CursorType.RESIZE_CNW);
+//							else if (el.getResizeW()) this.setCursor(CursorType.RESIZE_EW);
+//							else if (el.getResizeN()) this.setCursor(CursorType.RESIZE_NS);
+//						} else if (offsetX > (el.getAbsoluteWidth()-el.getResizeBorderEastSize()) && offsetX < el.getAbsoluteWidth() &&
+//							offsetY > (el.getAbsoluteHeight()-el.getResizeBorderSouthSize()) && offsetY < el.getAbsoluteHeight()) {
+//							if (el.getResizeE() && el.getResizeN()) this.setCursor(CursorType.RESIZE_CNE);
+//							else if (el.getResizeE()) this.setCursor(CursorType.RESIZE_EW);
+//							else if (el.getResizeN()) this.setCursor(CursorType.RESIZE_NS);
+//						} else if (offsetY > (el.getAbsoluteHeight()-el.getResizeBorderSouthSize()) && offsetY < el.getAbsoluteHeight()) {
+//							if (el.getResizeN()) this.setCursor(CursorType.RESIZE_NS);
+//						} else if (offsetX > el.getAbsoluteX() && offsetX < el.getAbsoluteX()+el.getResizeBorderWestSize()) {
+//							if (el.getResizeW()) this.setCursor(CursorType.RESIZE_EW);
+//						} else if (offsetX > (el.getAbsoluteWidth()-el.getResizeBorderEastSize()) && offsetX < el.getAbsoluteWidth()) {
+//							if (el.getResizeE()) this.setCursor(CursorType.RESIZE_EW);
+//						} else {
+//							this.setCursor(CursorType.POINTER);
+//						}
+//					} else {
+//						if (currentCursor != CursorType.HAND &&
+//							currentCursor != CursorType.TEXT)
+//							this.setCursor(CursorType.POINTER);
+//					}
+//				} else {
+//					this.setCursor(CursorType.POINTER);
+//				}
+//			}
+//			if (mouseFocusElement != previousMouseFocusElement) {
+//				if (previousMouseFocusElement instanceof MouseFocusListener) {
+//					((MouseFocusListener)previousMouseFocusElement).onLoseFocus(evt);
+//				}
+//				if (mouseFocusElement instanceof MouseFocusListener) {
+//					((MouseFocusListener)mouseFocusElement).onGetFocus(evt);
+//				}
+//				previousMouseFocusElement = mouseFocusElement;
+//			}
+//			if (mouseFocusElement != null) {
+//				focusElementIsMovable = mouseFocusElement.getIsMovable();
+//				
+//			}
+//			if (mouseFocusElement instanceof MouseMovementListener) {
+//				((MouseMovementListener)mouseFocusElement).onMouseMove(evt);
+//			}
+//			mouseWheelElement = getEventElement(mouseXY.x, mouseXY.y, EventCheckType.WheelMove);
+//			if (mouseWheelElement instanceof MouseWheelListener) {
+//				if (evt.getDeltaWheel() > 0) {
+//					((MouseWheelListener)mouseWheelElement).onMouseWheelDown(evt);
+//				} else if (evt.getDeltaWheel() < 0) {
+//					((MouseWheelListener)mouseWheelElement).onMouseWheelUp(evt);
+//				}
+//			}
+//		} else {
+//			if (eventElement != null) {
+//				if (mouseLeftPressed) {
+//					focusElementIsMovable = contactElement.getIsMovable();
+//					if (eventElementResizeDirection != null) {
+//						eventElement.resize(mouseXY.x, mouseXY.y, eventElementResizeDirection);
+//					} else if (focusElementIsMovable) {
+//						eventElement.moveTo(mouseXY.x-eventElementOffsetX, mouseXY.y-eventElementOffsetY);
+//					}
+//				}
+//
+//				if (eventElement instanceof MouseMovementListener) {
+//					((MouseMovementListener)eventElement).onMouseMove(evt);
+//				}
+//			}
+//		}
 		if (!subscreens.isEmpty() && !evt.isConsumed()) {
 			setLastCollision();
 			if (lastCollision != null) {
@@ -805,45 +819,45 @@ public class Screen implements ElementManager, Control, RawInputListener {
 				}
 			}
 		}
-		if (!mousePressed && mouseFocusElement == null) {
-			if (currentCursor != CursorType.POINTER)
-				this.setCursor(CursorType.POINTER);
-		}
-		
-		// 2D Framework
-		if (mouseFocusElement == null) {
-			if (!mousePressed) {
-				if (previousMouseFocusAnimElement != null) {
-					if (previousMouseFocusAnimElement instanceof MouseFocusListener) {
-						((MouseFocusListener)previousMouseFocusAnimElement).onLoseFocus(evt);
-						previousMouseFocusAnimElement = null;
-					}
-				}
-			//	getAnimEventTargets(evt.getX(), evt.getY());
-				if (eventAnimElement != null) {
-					mouseFocusAnimElement = eventAnimElement;
-					if (eventAnimElement instanceof MouseFocusListener) {
-						((MouseFocusListener)mouseFocusAnimElement).onGetFocus(evt);
-					}
-					previousMouseFocusAnimElement = mouseFocusAnimElement;
-				}
-			} else {
-				if (eventAnimElement != null) {
-					if (eventAnimElement.getIsMovable()) {
-
-					} else if (eventQuad.getIsMovable()) {
-						eventQuad.setPosition(
-							mouseXY.x-eventQuadOffsetX,
-							mouseXY.y-eventQuadOffsetY
-						);
-					}
-				}
-			}
-		}
-		
-		if (use3DSceneSupport) {
-			s3dOnMouseMotionEvent(evt, mouseFocusElement != null || mouseFocusAnimElement != null);
-		}
+//		if (!mousePressed && mouseFocusElement == null) {
+//			if (currentCursor != CursorType.POINTER)
+//				this.setCursor(CursorType.POINTER);
+//		}
+//		
+//		// 2D Framework
+//		if (mouseFocusElement == null) {
+//			if (!mousePressed) {
+//				if (previousMouseFocusAnimElement != null) {
+//					if (previousMouseFocusAnimElement instanceof MouseFocusListener) {
+//						((MouseFocusListener)previousMouseFocusAnimElement).onLoseFocus(evt);
+//						previousMouseFocusAnimElement = null;
+//					}
+//				}
+//			//	getAnimEventTargets(evt.getX(), evt.getY());
+//				if (eventAnimElement != null) {
+//					mouseFocusAnimElement = eventAnimElement;
+//					if (eventAnimElement instanceof MouseFocusListener) {
+//						((MouseFocusListener)mouseFocusAnimElement).onGetFocus(evt);
+//					}
+//					previousMouseFocusAnimElement = mouseFocusAnimElement;
+//				}
+//			} else {
+//				if (eventAnimElement != null) {
+//					if (eventAnimElement.getIsMovable()) {
+//
+//					} else if (eventQuad.getIsMovable()) {
+//						eventQuad.setPosition(
+//							mouseXY.x-eventQuadOffsetX,
+//							mouseXY.y-eventQuadOffsetY
+//						);
+//					}
+//				}
+//			}
+//		}
+//		
+//		if (use3DSceneSupport) {
+//			s3dOnMouseMotionEvent(evt, mouseFocusElement != null || mouseFocusAnimElement != null);
+//		}
 	}
 
 	@Override
@@ -1396,7 +1410,10 @@ public class Screen implements ElementManager, Control, RawInputListener {
 		pickRay.setOrigin(click3d);
 		pickRay.setDirection(pickDir);
 		CollisionResults results = new CollisionResults();
-		app.getViewPort().getScenes().get(0).collideWith(pickRay, results);
+		
+		//TODO jjc changed this to work with VR
+//		app.getViewPort().getScenes().get(0).collideWith(pickRay, results);
+		app.getRootNode().collideWith(pickRay, results);
 		lastCollision = results.getClosestCollision();
 	}
 	

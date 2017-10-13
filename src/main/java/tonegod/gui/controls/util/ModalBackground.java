@@ -7,8 +7,9 @@ package tonegod.gui.controls.util;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector4f;
+
 import tonegod.gui.core.Element;
-import tonegod.gui.core.Screen;
+import tonegod.gui.core.ElementManager;
 import tonegod.gui.core.utils.UIDUtil;
 
 /**
@@ -21,7 +22,7 @@ public class ModalBackground extends Element {
 	float resetAlpha = 0.5f;
 	float alpha = 0.5f;
 	
-	public ModalBackground(Screen screen) {
+	public ModalBackground(ElementManager screen) {
 		super(
 			screen,
 			UIDUtil.getUID(),

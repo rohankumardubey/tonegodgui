@@ -9,6 +9,8 @@ import com.jme3.renderer.ViewPort;
 import com.jme3.scene.control.AbstractControl;
 import java.util.ArrayList;
 import java.util.List;
+
+import tonegod.gui.core.ElementManager;
 import tonegod.gui.core.Screen;
 import tonegod.gui.framework.animation.TemporalAction;
 import tonegod.gui.framework.core.util.GameTimer;
@@ -18,7 +20,7 @@ import tonegod.gui.framework.core.util.GameTimer;
  * @author t0neg0d
  */
 public class AnimManager extends AbstractControl {
-	private Screen screen;
+	private ElementManager screen;
 	private List<ActionItem> queue = new ArrayList<>();
 	private List<ActionItem> remove = new ArrayList<>();
 	private List<ActionItem> active = new ArrayList<>();
@@ -28,7 +30,7 @@ public class AnimManager extends AbstractControl {
 	
 	float time;
 	
-	public AnimManager(Screen screen) {
+	public AnimManager(ElementManager screen) {
 		this.screen = screen;
 		time = this.screen.getApplication().getTimer().getTimeInSeconds();
 	}

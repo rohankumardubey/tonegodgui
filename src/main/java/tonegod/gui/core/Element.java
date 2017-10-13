@@ -583,7 +583,7 @@ public class Element extends Node {
 	 * Recursive call made by the screen control to properly initialize z-order (depth) placement
 	 * @param zOrder The depth to place the Element at. (Relative to the parent's z-order)
 	 */
-	protected void initZOrder(float zOrder) {
+	public void initZOrder(float zOrder) {
 		setLocalTranslation(getLocalTranslation().setZ(
 			zOrder
 		));

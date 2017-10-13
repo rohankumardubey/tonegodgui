@@ -8,7 +8,7 @@ package tonegod.gui.core;
  *
  * @author t0neg0d
  */
-class ConflictingIDException extends Exception {
+public class ConflictingIDException extends Exception {
 	public ConflictingIDException () {  }
 	
     public ConflictingIDException (String message) {

@@ -5,6 +5,7 @@ import com.jme3.font.LineWrapMode;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector2f;
 import tonegod.gui.controls.text.TextElement;
+import tonegod.gui.core.ElementManager;
 import tonegod.gui.core.Screen;
 
 /**
@@ -15,13 +16,13 @@ public class ScaleUtil {
 	private float REF_WIDTH = 720;
 	private float REF_HEIGHT = 480;
 	
-	private Screen screen;
+	private ElementManager screen;
 	
 	private float baseFontSize = 30;
 	private float gameScale = 1;
 	private float fontScale = 1;
 	
-	public ScaleUtil(Screen screen) {
+	public ScaleUtil(ElementManager screen) {
 		this.screen = screen;
 	}
 	

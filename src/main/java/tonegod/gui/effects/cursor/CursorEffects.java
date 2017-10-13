@@ -8,6 +8,7 @@ import com.jme3.app.Application;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector2f;
 import com.jme3.scene.Node;
+
 import tonegod.gui.controls.extras.emitter.AlphaInfluencer;
 import tonegod.gui.controls.extras.emitter.ColorInfluencer;
 import tonegod.gui.controls.extras.emitter.DirectionInfluencer;
@@ -17,7 +18,7 @@ import tonegod.gui.controls.extras.emitter.ImpulseInfluencer;
 import tonegod.gui.controls.extras.emitter.RotationInfluencer;
 import tonegod.gui.controls.extras.emitter.SizeInfluencer;
 import tonegod.gui.controls.extras.emitter.SpriteInfluencer;
-import tonegod.gui.core.Screen;
+import tonegod.gui.core.ElementManager;
 import tonegod.gui.framework.animation.Interpolation;
 
 /**
@@ -36,7 +37,7 @@ public class CursorEffects {
 		FLAMES,
 		OOZE
 	}
-	private Screen screen;
+	private ElementManager screen;
 	private Application app;
 	private ElementEmitter cursorEmitter;
 	private EmitterTheme theme = EmitterTheme.SPARKS;
@@ -46,7 +47,7 @@ public class CursorEffects {
 	private CursorEffectSettings rightClickSettings = new CursorEffectSettings();
 	private boolean isActive = false;
 	
-	public CursorEffects(Screen screen) {
+	public CursorEffects(ElementManager screen) {
 		this.screen = screen;
 		this.app = screen.getApplication();
 		

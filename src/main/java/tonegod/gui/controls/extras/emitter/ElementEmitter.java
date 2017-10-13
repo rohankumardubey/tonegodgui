@@ -1,5 +1,12 @@
 package tonegod.gui.controls.extras.emitter;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.jme3.app.Application;
 import com.jme3.export.JmeExporter;
 import com.jme3.export.JmeImporter;
@@ -13,14 +20,9 @@ import com.jme3.scene.Spatial;
 import com.jme3.scene.control.Control;
 import com.jme3.texture.Texture;
 import com.jme3.texture.image.ImageRaster;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+
 import tonegod.gui.controls.extras.Portability;
-import tonegod.gui.core.Screen;
+import tonegod.gui.core.ElementManager;
 import tonegod.gui.framework.animation.Interpolation;
 import tonegod.gui.framework.animation.TemporalAction;
 import tonegod.gui.framework.core.AnimElement;
@@ -34,7 +36,7 @@ import tonegod.gui.framework.core.Transformable;
  */
 public class ElementEmitter implements Control, Transformable {
 	private List<TemporalAction> actions = new ArrayList<>();
-	private Screen screen;
+	private ElementManager screen;
 	private Application app;
 	private int particlesPerSecond;
 	private float targetInterval = 1f;
@@ -74,7 +76,7 @@ public class ElementEmitter implements Control, Transformable {
 	protected boolean ignoreMouse = true;
 	protected boolean isMovable = false;
 	
-	public ElementEmitter(Screen screen, Vector2f position, float emitterWidth, float emitterHeight) {
+	public ElementEmitter(ElementManager screen, Vector2f position, float emitterWidth, float emitterHeight) {
 		
 		this.screen = screen;
 		this.app = screen.getApplication();

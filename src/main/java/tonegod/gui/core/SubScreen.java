@@ -1,7 +1,16 @@
 package tonegod.gui.core;
 
-import tonegod.gui.style.Style;
+import java.io.IOException;
+import java.text.ParseException;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.StringTokenizer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.jme3.app.Application;
+import com.jme3.app.SimpleApplication;
 import com.jme3.collision.CollisionResult;
 import com.jme3.collision.CollisionResults;
 import com.jme3.export.JmeExporter;
@@ -24,14 +33,7 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.control.Control;
 import com.jme3.texture.Texture;
-import java.io.IOException;
-import java.text.ParseException;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.StringTokenizer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 import tonegod.gui.controls.form.Form;
 import tonegod.gui.controls.lists.ComboBox;
 import tonegod.gui.controls.menuing.AutoHide;
@@ -41,7 +43,6 @@ import tonegod.gui.controls.util.ModalBackground;
 import tonegod.gui.controls.util.ToolTip;
 import tonegod.gui.core.Element.Borders;
 import tonegod.gui.core.utils.ScaleUtil;
-import tonegod.gui.style.StyleManager.CursorType;
 import tonegod.gui.core.utils.UIDUtil;
 import tonegod.gui.effects.EffectManager;
 import tonegod.gui.effects.cursor.CursorEffects;
@@ -49,7 +50,15 @@ import tonegod.gui.framework.core.AnimElement;
 import tonegod.gui.framework.core.AnimLayer;
 import tonegod.gui.framework.core.AnimManager;
 import tonegod.gui.framework.core.QuadData;
-import tonegod.gui.listeners.*;
+import tonegod.gui.listeners.KeyboardListener;
+import tonegod.gui.listeners.MouseButtonListener;
+import tonegod.gui.listeners.MouseFocusListener;
+import tonegod.gui.listeners.MouseMovementListener;
+import tonegod.gui.listeners.MouseWheelListener;
+import tonegod.gui.listeners.TabFocusListener;
+import tonegod.gui.listeners.TouchListener;
+import tonegod.gui.style.Style;
+import tonegod.gui.style.StyleManager.CursorType;
 
 /**
  *
@@ -57,8 +66,8 @@ import tonegod.gui.listeners.*;
  */
 public class SubScreen implements ElementManager, Control {
 	private String UID;
-	private Screen screen;
-	private Application app;
+	private ElementManager screen;
+	private SimpleApplication app;
 	private SubScreenBridge bridge;
 	private Geometry geom;
 	
@@ -113,7 +122,7 @@ public class SubScreen implements ElementManager, Control {
 	 * @param screen The Application Screen class
          * @param geom geometry of the control
 	 */
-	public SubScreen(Screen screen, Geometry geom) {
+	public SubScreen(ElementManager screen, Geometry geom) {
 		this(screen, UIDUtil.getUID(), geom);
 	}
 	
@@ -124,7 +133,7 @@ public class SubScreen implements ElementManager, Control {
 	 * @param UID A Unique String ID for the SubScreen
          * @param geom geometry of the control
 	 */
-	public SubScreen(Screen screen, String UID, Geometry geom) {
+	public SubScreen(ElementManager screen, String UID, Geometry geom) {
 		this.UID = UID;
 		this.screen = screen;
 		this.app = screen.getApplication();
@@ -170,7 +179,7 @@ public class SubScreen implements ElementManager, Control {
 	 * @return Application app
 	 */
 	@Override
-	public Application getApplication() {
+	public SimpleApplication getApplication() {
 		return this.app;
 	}
 	
@@ -852,6 +861,8 @@ public class SubScreen implements ElementManager, Control {
 
 		subScreenNode.collideWith(elementZOrderRay, results);
 
+		
+		
 		float z = 0;
 		Element testEl = null, el = null;
 		for (CollisionResult result : results) {
@@ -1488,4 +1499,10 @@ public class SubScreen implements ElementManager, Control {
 		}
 	}
 	//</editor-fold>
+
+   @Override
+   public void playAudioNode(String key, float volume)
+   {
+      screen.playAudioNode(key, volume);
+   }
 }

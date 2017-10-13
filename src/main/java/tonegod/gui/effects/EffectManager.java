@@ -13,6 +13,8 @@ import com.jme3.scene.control.Control;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import tonegod.gui.core.ElementManager;
 import tonegod.gui.core.Screen;
 
 /**
@@ -20,13 +22,13 @@ import tonegod.gui.core.Screen;
  * @author t0neg0d
  */
 public class EffectManager implements Control {
-	Screen screen;
+	ElementManager screen;
 //	private Map<String, Effect> currentEffects = new HashMap();
 	private List<Effect> currentEffects = new ArrayList<>();
 	private List<EffectQueue> currentEffectQueues = new ArrayList<>();
 	private List<BatchEffect> currentBatchEffects = new ArrayList<>();
 	
-	public EffectManager(Screen screen) {
+	public EffectManager(ElementManager screen) {
 		this.screen = screen;
 	}
 	
