@@ -51,3 +51,5 @@ local.properties
 /.nb-gradle/
 /tonegodTest/.nb-gradle/
 /teset/.nb-gradle/
+.idea
+*.iml
