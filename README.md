@@ -1,10 +1,21 @@
 # tonegodgui project
 
+## IHMC Robotics Branch
+
+* Generalized input options to allow for mouse and Vive controller input.
+* Add some custom icons
+* Use IHMC build plugin
+
+## Fork Notes
+
 Tonegodgui is a native graphical user-interface library for jMonkeyEngine3.
 
-This project's repository (at https://github.com/ihmcrobotics/tonegodgui)
+This project's repository: https://github.com/ihmcrobotics/tonegodgui
+
 was forked from https://github.com/stephengold/tonegodgui
+
 which was forked from https://github.com/meltzow/tonegodgui
+
 which was exported from https://code.google.com/p/tonegodgui
 
 The project currently targets jMonkeyEngine 3.1 and JDK 1.8.
