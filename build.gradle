@@ -11,7 +11,7 @@ buildscript {
 apply plugin: "us.ihmc.ihmc-build"
 
 ihmc {
-   group = "tonegod"
+   group = "us.ihmc"
    version = "0.1.1"
    vcsUrl = "https://github.com/ihmcrobotics/tonegodgui"
    openSource = true
