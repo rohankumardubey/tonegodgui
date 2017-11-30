@@ -10,6 +10,7 @@
 *.ear
 lib/jME3*
 **/bin/
+**/out/
 
 .project
 .classpath
