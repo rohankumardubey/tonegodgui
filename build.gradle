@@ -22,7 +22,7 @@ ihmc {
 
 dependencies {
    //compile "com.jme3:jme3-core:3.0.10"
-   compile "org.jmonkeyengine:jme3-core:3.1.0-stable"
+   compile group: "org.jmonkeyengine", name: "jme3-core", version: "NIGHTLY-171129"
 }
 
 gradle.projectsEvaluated {
