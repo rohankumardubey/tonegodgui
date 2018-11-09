@@ -189,7 +189,7 @@ public abstract class ComboBox extends TextField {
 	 */
 	public void addListItem(String caption, Object value) {
 		if (DDList == null) {
-			DDList = new Menu(screen, ddUID, new Vector2f(0,0), true) {
+			DDList = new Menu(screen, ddUID, new Vector2f(0,0), false) {
 				@Override
 				public void onMenuItemClicked(int index, Object value, boolean isToggled) {
 					((ComboBox)getCallerElement()).setSelectedWithCallback(index, DDList.getMenuItem(index).getCaption(), value);
