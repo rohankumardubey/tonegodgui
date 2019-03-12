@@ -1,14 +1,7 @@
-buildscript {
-   repositories {
-      maven { url "https://plugins.gradle.org/m2/" }
-      mavenLocal()
-      jcenter()
-   }
-   dependencies {
-      classpath "us.ihmc:ihmc-build:0.15.7"
-   }
+plugins {
+   id("us.ihmc.ihmc-build") version "0.15.7"
+   id("us.ihmc.ihmc-ci") version "4.23"
 }
-apply plugin: "us.ihmc.ihmc-build"
 
 ihmc {
    group = "us.ihmc"
