@@ -15,8 +15,8 @@ ihmc {
 }
 
 dependencies {
-   //compile "com.jme3:jme3-core:3.0.10"
-   compile("org.jmonkeyengine:jme3-core:3.2.0-171208")
+   //api("com.jme3:jme3-core:3.0.10")
+   api("org.jmonkeyengine:jme3-core:3.2.0-171208")
 }
 
 gradle.projectsEvaluated {
