@@ -54,3 +54,5 @@ local.properties
 /teset/.nb-gradle/
 .idea
 *.iml
+
+**/rebel.xml
